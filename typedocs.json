@@ -1,0 +1,12 @@
+{
+  "sort": "required-first",
+  "hideGenerator": true,
+  "entryPoints": [
+    "./server/"
+  ],
+  "out": "./docs",
+  "includeVersion": true,
+  "categorizeByGroup": true,
+  "readme": "./readme.md",
+  "media": "./media"
+}

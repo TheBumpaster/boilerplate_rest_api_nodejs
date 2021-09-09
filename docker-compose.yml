@@ -1,0 +1,32 @@
+version: '3'
+services:
+  mongo_database:
+    image: mongo
+    container_name: "api_database"
+    ports:
+    - "27017:27017"
+    networks:
+      - network_name
+    command: mongod
+  api_server:
+    env_file: .env
+    container_name: "api_server"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NODE: production
+        PORT: ${PORT}
+    environment:
+      - 'PORT=${PORT}'
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - ./:/home/node/app
+    networks:
+      - network_name
+    restart: 'always'
+    command: npm run serve
+networks:
+  network_name:
+    external: true
