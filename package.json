@@ -7,7 +7,7 @@
     "build": "tsc && echo Server Compiled Successfully;",
     "docs": "typedoc --options typedocs.json",
     "lint": "eslint 'server/**/*.ts' --quiet --fix",
-    "test": "npm run test:unit & npm run test:e2e",
+    "test": "echo ' ******************************************************** Unit Test Specification ******************************************************** ' & npm run test:unit && echo ' ******************************************************** E2E Test Specification ******************************************************** ' & npm run test:e2e",
     "test:unit": "mocha --require ts-node/register tests/unit/**/*.test.ts --colors --full-trace --bail --exit",
     "test:e2e": "mocha --require ts-node/register tests/e2e/**/*.test.ts --colors --full-trace --bail --exit",
     "serve": "ts-node-dev server/index.ts",
@@ -27,6 +27,8 @@
     "nodejs", "api", "typescript", "openapi", "docker"
   ],
   "author": "Ismar Hadzic",
+  "maintainers": ["hadzicismar67@gmail.com"],
+  "homepage": "https://thebumpaster.com",
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "compression": "^1.7.4",

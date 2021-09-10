@@ -48,9 +48,6 @@ paths:
                   user:
                     username: alphanumericusername
                     password: b2369f41f18fa68e0434b6b7f4e62a188b1c9bedf
-                    likes:
-                      map: {}
-                      count: 0
                     _id: 6134b44c6c0e0e4eaf8c63f6
                     createdAt: 2021-09-05T12:13:00.374Z
                     updatedAt: 2021-09-05T12:13:00.374Z
@@ -211,8 +208,28 @@ paths:
                     properties:
                       message:
                         type: string
-  /api/v1/system/me/update-password:
+
+  /api/v1/users/:
     post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              username: alphanumericusername
+              password: eightcharachters
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      tags:
+        - User
+      description: Create a new user (username, password)
+      security:
+        - bearerAuth: [ ]
       parameters:
         - in: header
           name: Authorization
@@ -220,38 +237,260 @@ paths:
           schema:
             type: string
           allowReserved: true
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                newPassword:
-                  type: string
-                oldPassword:
-                  type: string
-      security:
-        - bearerAuth: []
-      tags:
-        - System
-      description: Update the current users password
       responses:
-        200:
-          description: Successfully updates user password
+        201:
+          description: Successfully created user
           content:
             application/json:
               example:
-                meta: {}
+                meta: { }
                 result:
-                  username: alphanumericusername
-                  password: b2369f41f18fa68e0434b6b7f4e62a188b1c9bedf
-                  likes:
-                    map: { }
-                    count: 0
-                  _id: 6134b44c6c0e0e4eaf8c63f6
-                  createdAt: 2021-09-05T12:13:00.374Z
-                  updatedAt: 2021-09-05T12:13:00.374Z
+                  message: User created.
+                  user:
+                    username: alphanumericusername
+                    password: b2369f41f18fa68e0434b6b7f4e62a188b1c9bedf
+                    _id: 6134b44c6c0e0e4eaf8c63f6
+                    createdAt: 2021-09-05T12:13:00.374Z
+                    updatedAt: 2021-09-05T12:13:00.374Z
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      user:
+                        $ref: '#/components/schemas/userDocument'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                meta: { }
+                result:
+                  message: Invalid input values.
+                errors:
+                  - original:
+                      username: goodusername
+                      password: badpass
+                    details:
+                      - message: "\"password\" length must be at least 8 characters long"
+                        path:
+                          - password
+                        type: string.min
+                        context:
+                          limit: 8
+                          value: badpass
+                          label: password
+                          key: password
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                  errors:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/invalidSignPayload'
+    get:
+      tags:
+        - User
+      description: Query user list
+      parameters:
+        - in: header
+          name: Authorization
+          description: Bearer JWT Authorization Token ( Use Authorize button in SwaggerUI to set this value )
+          schema:
+            type: string
+          allowReserved: true
+        - in: query
+          name: limit
+          description: Number of users to return in response
+          schema:
+            type: number
+        - in: query
+          name: skip
+          description: Number of users to skip by the order
+          schema:
+            type: number
+        - in: query
+          name: filterQuery
+          description: FilterQuery<IUserDocument> from mongoose
+          schema:
+            example:
+              filterQuery:
+                username: alphanumericusername
+            type: object
+            properties:
+              filterQuery:
+                type: object
+                properties:
+                  username:
+                    type: string
+                  createdAt:
+                    type: string
+                  updatedAt:
+                    type: string
+                  id:
+                    type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        200:
+          description: Returns a list of users by submitted query
+          content:
+            application/json:
+              example:
+                meta: { }
+                result:
+                  - username: alphanumericusername
+                    password: b2369f41f18fa68e0434b6b7f4e62a188b1c9bedf
+                    _id: 6134b44c6c0e0e4eaf8c63f6
+                    createdAt: 2021-09-05T12:13:00.374Z
+                    updatedAt: 2021-09-05T12:13:00.374Z
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/userDocument'
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                result:
+                  message: Authorization token is required.
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+
+  /api/v1/users/{id}:
+    delete:
+      tags:
+        - User
+      description: Delete a user by user ID
+      parameters:
+        - in: header
+          name: Authorization
+          description: Bearer JWT Authorization Token ( Use Authorize button in SwaggerUI to set this value )
+          schema:
+            type: string
+          allowReserved: true
+        - in: path
+          name: id
+          description: User Id
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              example:
+                meta: { }
+                result: {}
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  result:
+                    type: object
+        400:
+          description: Password do not match
+          content:
+            application/json:
+              example:
+                meta: { }
+                result:
+                  message: ID passed is not an ObjectId
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                result:
+                  message: Authorization token is required.
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+        404:
+          description: User not found response
+          content:
+            application/json:
+              example:
+                meta: { }
+                result:
+                  message: User does not exist with this id
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+    get:
+      tags:
+        - User
+      description: Get user details by user ID
+      parameters:
+        - in: header
+          name: Authorization
+          description: Bearer JWT Authorization Token ( Use Authorize button in SwaggerUI to set this value )
+          schema:
+            type: string
+          allowReserved: true
+        - in: path
+          name: id
+          description: User Id
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
               schema:
                 type: object
                 properties:
@@ -260,11 +499,11 @@ paths:
                   result:
                     $ref: '#/components/schemas/userDocument'
         400:
-          description: Password do not match
+          description: User ID provided is not an objectId
           content:
             application/json:
               example:
-                meta: {}
+                meta: { }
                 result:
                   message: Old password does not match current password.
               schema:
@@ -292,42 +531,102 @@ paths:
                     properties:
                       message:
                         type: string
-
-  /api/v1/users/{id}:
-    get:
-      tags:
-        - User
-      description: List username & number of likes of a user
-      parameters:
-        - in: path
-          name: id
-          description: User Id
-          required: true
-          schema:
-            type: string
-      responses:
-        200:
-          description: Successful response
-          content:
-            application/json:
-              example:
-                meta: {}
-                result:
-                  username: alphanumericusername
-                  numberOfLikes: 0
-              schema:
-                type: object
-                properties:
-                  meta:
-                    type: object
-                  result:
-                    $ref: '#/components/schemas/userPublicData'
         404:
           description: User not found response
           content:
             application/json:
               example:
                 meta: {}
+                result:
+                  message: User does not exist with this id
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+    put:
+      tags:
+        - User
+      description: Update user by user ID
+      parameters:
+        - in: header
+          name: Authorization
+          description: Bearer JWT Authorization Token ( Use Authorize button in SwaggerUI to set this value )
+          schema:
+            type: string
+          allowReserved: true
+        - in: path
+          name: id
+          description: User Id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      security:
+        - bearerAuth: [ ]
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  result:
+                    $ref: '#/components/schemas/userDocument'
+        400:
+          description: Password do not match
+          content:
+            application/json:
+              example:
+                meta: { }
+                result:
+                  message: Old password does not match current password.
+              schema:
+                type: object
+                properties:
+                  meta:
+                    type: object
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+        401:
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                result:
+                  message: Authorization token is required.
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+        404:
+          description: User not found response
+          content:
+            application/json:
+              example:
+                meta: { }
                 result:
                   message: User does not exist with this id
               schema:
@@ -394,13 +693,6 @@ components:
           type: string
         password:
           type: string
-        likes:
-          type: object
-          properties:
-            map:
-              type: object
-            count:
-              type: number
         _id:
           type: string
         createdAt:
@@ -412,8 +704,6 @@ components:
       properties:
         username:
           type: string
-        numberOfLikes:
-          type: number
     invalidSignPayload:
       type: object
       properties:

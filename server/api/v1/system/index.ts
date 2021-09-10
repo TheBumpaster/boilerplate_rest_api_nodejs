@@ -26,6 +26,7 @@ export class SystemRouter {
     private _router: Router = Router();
 
     constructor() {
+
         this._router.post("/signup", async (request: Request, response: Response) => {
             try {
 
@@ -160,47 +161,6 @@ export class SystemRouter {
                     .setStatus(responseCodes.ERROR)
                     .build()
             }
-        });
-
-        this._router.post("/me/update-password", Authorize, async (request: IAuthorizedRequest, response: Response) => {
-            if(!request.body.oldPassword || !request.body.newPassword) {
-                return new ResponseBuilder(response)
-                    .setMeta(request.query)
-                    .setData({ message: "Invalid request parameters." })
-                    .setStatus(responseCodes.INVALID)
-                    .build()
-            }
-            try {
-                const user = await userModel.findUserByUsername(request.userData?.username as string);
-                if (Cipher(request.body.oldPassword) !== user?.password) {
-                    return new ResponseBuilder(response)
-                        .setMeta(request.query)
-                        .setData({
-                            message: "Old password does not match current password."
-                        })
-                        .setStatus(responseCodes.INVALID)
-                        .build()
-                }
-
-                await userModel.updateUserPassword(request.userData?._id as string, Cipher(request.body.newPassword));
-
-                return new ResponseBuilder(response)
-                    .setMeta(request.query)
-                    .setData(user)
-                    .setStatus(responseCodes.SUCCESS)
-                    .build()
-
-            } catch (e) {
-                logger.error("Exception", e);
-
-                return new ResponseBuilder(response)
-                    .setMeta(request.query)
-                    .setErrors(e as Error)
-                    .setData({ message: "Caught an exception in API Handler." })
-                    .setStatus(responseCodes.ERROR)
-                    .build()
-            }
-
         });
     }
 

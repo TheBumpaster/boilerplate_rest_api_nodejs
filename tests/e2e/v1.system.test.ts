@@ -15,7 +15,6 @@ describe("System API Tests", function () {
 
     let user: IUser;
     let token: string;
-    const newPassword = faker.internet.password(9);
 
     before((done) => {
 
@@ -74,23 +73,6 @@ describe("System API Tests", function () {
                 expect(response.status).to.equal(200);
                 expect(response.body.result._id).to.be.a("string");
                 expect(response.body.result.username).to.be.a("string");
-                expect(response.body.result.createdAt).to.be.a("string");
-                expect(response.body.result.updatedAt).to.be.a("string");
-                done();
-            });
-
-    });
-
-    it('Should successfully update currently logged user password', (done) => {
-        chai.request(application)
-            .post("/api/v1/system/me/update-password")
-            .send({oldPassword: user.password, newPassword})
-            .set("Authorization", "Bearer " + token)
-            .then((response) => {
-                expect(response.status).to.equal(200);
-                expect(response.body.result._id).to.be.a("string");
-                expect(response.body.result.username).to.be.a("string");
-                expect(response.body.result.password).to.be.a("string");
                 expect(response.body.result.createdAt).to.be.a("string");
                 expect(response.body.result.updatedAt).to.be.a("string");
                 done();

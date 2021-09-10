@@ -16,7 +16,8 @@ export class Logger {
 
     constructor(name: string, label?: string) {
 
-        let level = process.env.NODE_ENV === undefined ? "debug" : "info";
+        let level = process.env.NODE_ENV === undefined || process.env.NODE_ENV === "debug" ? "debug" : "info";
+
         let transports;
 
         if (process.env.NODE_ENV === "test") {
@@ -92,7 +93,7 @@ export class Logger {
      * @param meta
      */
     public debug(message: string, meta: unknown[]): void {
-        this._service.info(message, meta);
+        this._service.debug(message, meta);
     }
 
 }

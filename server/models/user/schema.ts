@@ -9,10 +9,7 @@ export interface IUser {
 
 export interface IUserDocument extends IUser, Document {
     _id: string;
-    likes: {
-        map: Map<string, boolean>,
-        count: number,
-    };
+    active: boolean;
     createdAt: string;
     updatedAt: string;
 }
@@ -27,16 +24,9 @@ export const userSchema = new Schema({
         type: SchemaTypes.String,
         required: true,
     },
-    likes: {
-        map: {
-            type: SchemaTypes.Map,
-            of: SchemaTypes.Boolean,
-            default: {}
-        },
-        count: {
-            type: SchemaTypes.Number,
-            default: 0
-        }
+    active: {
+        type: SchemaTypes.Boolean,
+        default: false
     }
 }, {
     id: true,

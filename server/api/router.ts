@@ -9,6 +9,7 @@ import {serveWithOptions, setup} from "swagger-ui-express";
 import {readFileSync} from "fs";
 import {join} from "path";
 import YAML from 'yaml'
+const {version, description, author, name, homepage, maintainers} = require("../../package.json");
 
 /**
  * Attaches route stacks to express.Application
@@ -45,19 +46,23 @@ export default function InitializeRouter(app: Application): Promise<void> {
             app.use("/api/docs/v1", (request: Request, response: Response) => {
                 // Parse YAML
                 const file = readFileSync(join(__dirname, 'v1/api.spec.yaml'), 'utf8')
-                const openAPIDefinition = YAML.parse(file)
+                const openAPIDefinition = YAML.parse(file, {})
 
-                const {version, description, author, name} = require("../../package.json");
-
-                // Attach package version number to the API
-                openAPIDefinition.info.title = name
-                openAPIDefinition.info.description = description
-                openAPIDefinition.info.version = version
-                openAPIDefinition.contact.name = author
+                openAPIDefinition.info = {
+                    title: name,
+                    description: description,
+                    version: version,
+                    contact: {
+                        name: author,
+                        url: homepage,
+                        email: maintainers[0]
+                    }
+                }
 
                 response.status(responseCodes.SUCCESS)
                 response.send(openAPIDefinition);
             });
+
             // Serving static files for the UI
             app.use("/api/docs", serveWithOptions({
                 cacheControl: true,
@@ -80,6 +85,7 @@ export default function InitializeRouter(app: Application): Promise<void> {
 
             // Mount error handler
             app.use((err: Error, request: Request, response: Response, nextFunction: NextFunction) => {
+                logger.error("Internal Server Error", err);
                 return new ResponseBuilder(response)
                     .setStatus(responseCodes.ERROR)
                     .setErrors(err)
